@@ -17,7 +17,7 @@ This is a production-ready Node.js/Express server for the HomiEase Smart Home sy
 
 1.  **Clone the repository:**
     ```sh
-    git clone <your-repo-url>
+    git clone https://github.com/tsounisa/homi-ease-backend.git
     cd homiease-api
     ```
 
