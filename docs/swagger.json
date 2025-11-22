@@ -2,15 +2,81 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Smart Home REST API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing Houses, Rooms, and Smart Devices for the Software Engineering II assignment."
   },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api/v1",
+      "description": "Local Development Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "House": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "userId": { "type": "string", "description": "Foreign Key: Owner of the house" }
+        }
+      },
+      "Room": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "houseId": { "type": "string", "description": "Foreign Key: House this room belongs to" }
+        }
+      },
+      "Device": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"] },
+          "status": { "type": "string" },
+          "roomId": { "type": "string", "description": "Foreign Key: Room this device belongs to" }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
   "paths": {
-    "/users": {
+    "/auth/register": {
       "post": {
-        "summary": "Create account",
+        "summary": "Register a new account",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "John Doe" },
+                  "email": { "type": "string", "format": "email", "example": "john@homiease.com" },
+                  "password": { "type": "string", "format": "password", "minLength": 8, "example": "securePass123" }
+                },
+                "required": ["name", "email", "password"]
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": "User created"
+            "description": "User registered successfully"
           }
         }
       }
@@ -18,338 +84,238 @@
     "/auth/login": {
       "post": {
         "summary": "Login to account",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "admin@homiease.com" },
+                  "password": { "type": "string", "format": "password", "example": "password123" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Login successful"
+          },
+          "401": {
+            "description": "Invalid credentials"
           }
         }
       }
     },
     "/houses": {
-      "post": {
-        "summary": "Add a house",
+      "get": {
+        "summary": "Get user's houses",
+        "tags": ["Houses"],
         "responses": {
-          "201": {
-            "description": "House added"
+          "200": {
+            "description": "List of houses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/House" }
+                }
+              }
+            }
           }
         }
+      },
+      "post": {
+        "summary": "Add a house",
+        "tags": ["Houses"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string", "example": "My Smart Villa" } },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "House created" } }
       }
     },
     "/houses/{houseId}": {
-      "delete": {
-        "summary": "Remove a house",
-        "parameters": [
-          {
-            "name": "houseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
+      "get": {
+        "summary": "Get house details",
+        "tags": ["Houses"],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { 
+            "description": "House details",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/House" } } }
+          },
+          "404": { "description": "House not found" }
+        }
+      },
+      "put": {
+        "summary": "Update house details",
+        "tags": ["Houses"],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string", "example": "Updated Villa Name" } }
+              }
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "House removed"
-          }
-        }
+        },
+        "responses": { "200": { "description": "House updated" } }
+      },
+      "delete": {
+        "summary": "Remove a house",
+        "tags": ["Houses"],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "House removed" } }
       }
     },
     "/houses/{houseId}/rooms": {
+      "get": {
+        "summary": "Get all rooms for a house",
+        "tags": ["Rooms"],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { 
+            "description": "List of rooms retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Room" }
+                }
+              }
+            }
+          } 
+        }
+      },
       "post": {
         "summary": "Add a room to a house",
-        "parameters": [
-          {
-            "name": "houseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
+        "tags": ["Rooms"],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string", "example": "Kitchen" } },
+                "required": ["name"]
+              }
             }
           }
-        ],
-        "responses": {
-          "201": {
-            "description": "Room added"
-          }
-        }
+        },
+        "responses": { "201": { "description": "Room added successfully" } }
       }
     },
     "/rooms/{roomId}": {
-      "delete": {
-        "summary": "Remove a room",
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
+      "put": {
+        "summary": "Update room details",
+        "tags": ["Rooms"],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string", "example": "Master Bedroom" } }
+              }
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Room removed"
-          }
-        }
+        },
+        "responses": { "200": { "description": "Room updated successfully" } }
+      },
+      "delete": {
+        "summary": "Remove a room",
+        "tags": ["Rooms"],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Room removed successfully" } }
       }
     },
     "/rooms/{roomId}/devices": {
       "post": {
         "summary": "Add smart device to room",
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
+        "tags": ["Devices"],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { 
+                  "name": { "type": "string", "example": "Ceiling Light" },
+                  "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"], "example": "switch" }
+                },
+                "required": ["name", "type"]
+              }
             }
           }
-        ],
-        "responses": {
-          "201": {
-            "description": "Device added"
-          }
-        }
+        },
+        "responses": { "201": { "description": "Device added" } }
       }
     },
     "/devices/{deviceId}": {
       "delete": {
         "summary": "Remove smart device",
-        "parameters": [
-          {
-            "name": "deviceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Device removed"
-          }
-        }
+        "tags": ["Devices"],
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Device removed" } }
       },
       "put": {
-        "summary": "Categorize a smart device",
-        "parameters": [
-          {
-            "name": "deviceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
+        "summary": "Update or Categorize a smart device",
+        "tags": ["Devices"],
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { 
+                  "name": { "type": "string", "example": "Living Room Lamp" },
+                  "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"] }
+                }
+              }
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Device updated"
-          }
-        }
+        },
+        "responses": { "200": { "description": "Device updated" } }
       }
     },
     "/devices/{deviceId}/status": {
       "get": {
-        "summary": "Communicate with smart device",
-        "parameters": [
-          {
-            "name": "deviceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Status retrieved"
-          }
-        }
-      }
-    },
-    "/devices/{deviceId}/action": {
-      "post": {
-        "summary": "Control smart device manually",
-        "parameters": [
-          {
-            "name": "deviceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Action performed"
-          }
-        }
-      }
-    },
-    "/rooms/{roomId}/temperature": {
-      "put": {
-        "summary": "Set room temperature",
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Temperature set"
-          }
-        }
-      }
-    },
-    "/rooms/{roomId}/lighting": {
-      "put": {
-        "summary": "Control lighting of a room",
-        "parameters": [
-          {
-            "name": "roomId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Lighting set"
-          }
-        }
-      }
-    },
-    "/security/{deviceId}/state": {
-      "put": {
-        "summary": "Control the security system",
-        "parameters": [
-          {
-            "name": "deviceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Security system updated"
-          }
-        }
-      }
-    },
-    "/automations": {
-      "post": {
-        "summary": "Automate smart devices",
-        "responses": {
-          "201": {
-            "description": "Automation rule created"
-          }
-        }
-      }
-    },
-    "/scenarios": {
-      "post": {
-        "summary": "Create a scenario",
-        "responses": {
-          "201": {
-            "description": "Scenario created"
-          }
-        }
-      }
-    },
-    "/users/{userId}/statistics": {
-      "get": {
-        "summary": "View statistics",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Statistics retrieved"
-          }
-        }
-      }
-    },
-    "/users/{userId}/notifications": {
-      "post": {
-        "summary": "Send notification to user",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Notification sent"
-          }
-        }
-      }
-    },
-    "/users/{userId}/home": {
-      "put": {
-        "summary": "Customize home screen",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Home screen customized"
-          }
-        }
-      }
-    },
-    "/users/{userId}/widgets": {
-      "post": {
-        "summary": "Add widgets",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Widget added"
-          }
+        "summary": "Get smart device status",
+        "tags": ["Devices"],
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+            "200": { 
+                "description": "Status retrieved",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": { "type": "string", "example": "ON" },
+                                "lastActive": { "type": "string", "format": "date-time" }
+                            }
+                        }
+                    }
+                }
+            } 
         }
       }
     }
