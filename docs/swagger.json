@@ -3,7 +3,7 @@
   "info": {
     "title": "Smart Home REST API",
     "version": "1.0.0",
-    "description": "API for managing Houses, Rooms, and Smart Devices for the Software Engineering II assignment."
+    "description": "API for managing Houses, Rooms, and Smart Devices. Examples match 'mockData.js' for easy testing."
   },
   "servers": [
     {
@@ -23,27 +23,27 @@
       "House": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "userId": { "type": "string", "description": "Foreign Key: Owner of the house" }
+          "id": { "type": "string", "example": "house-1" },
+          "name": { "type": "string", "example": "Demo User's Home" },
+          "userId": { "type": "string", "description": "Foreign Key: Owner of the house", "example": "user-1" }
         }
       },
       "Room": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "houseId": { "type": "string", "description": "Foreign Key: House this room belongs to" }
+          "id": { "type": "string", "example": "room-1" },
+          "name": { "type": "string", "example": "Living Room" },
+          "houseId": { "type": "string", "description": "Foreign Key: House this room belongs to", "example": "house-1" }
         }
       },
       "Device": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"] },
-          "status": { "type": "string" },
-          "roomId": { "type": "string", "description": "Foreign Key: Room this device belongs to" }
+          "id": { "type": "string", "example": "device-1" },
+          "name": { "type": "string", "example": "Living Room Lamp" },
+          "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"], "example": "switch" },
+          "status": { "type": "string", "example": "ON" },
+          "roomId": { "type": "string", "description": "Foreign Key: Room this device belongs to", "example": "room-1" }
         }
       }
     }
@@ -65,9 +65,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string", "example": "John Doe" },
-                  "email": { "type": "string", "format": "email", "example": "john@homiease.com" },
-                  "password": { "type": "string", "format": "password", "minLength": 8, "example": "securePass123" }
+                  "name": { "type": "string", "example": "New User" },
+                  "email": { "type": "string", "format": "email", "example": "newuser@test.com" },
+                  "password": { "type": "string", "format": "password", "minLength": 8, "example": "password123" }
                 },
                 "required": ["name", "email", "password"]
               }
@@ -85,6 +85,7 @@
       "post": {
         "summary": "Login to account",
         "tags": ["Auth"],
+        "description": "Use the credentials from mockData.js for instant access.",
         "requestBody": {
           "required": true,
           "content": {
@@ -92,7 +93,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": { "type": "string", "format": "email", "example": "admin@homiease.com" },
+                  "email": { "type": "string", "format": "email", "example": "user@example.com" },
                   "password": { "type": "string", "format": "password", "example": "password123" }
                 },
                 "required": ["email", "password"]
@@ -137,7 +138,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": { "name": { "type": "string", "example": "My Smart Villa" } },
+                "properties": { "name": { "type": "string", "example": "My Vacation Home" } },
                 "required": ["name"]
               }
             }
@@ -150,7 +151,7 @@
       "get": {
         "summary": "Get house details",
         "tags": ["Houses"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
         "responses": { 
           "200": { 
             "description": "House details",
@@ -162,14 +163,14 @@
       "put": {
         "summary": "Update house details",
         "tags": ["Houses"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": { "name": { "type": "string", "example": "Updated Villa Name" } }
+                "properties": { "name": { "type": "string", "example": "Renovated House Name" } }
               }
             }
           }
@@ -179,7 +180,7 @@
       "delete": {
         "summary": "Remove a house",
         "tags": ["Houses"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
         "responses": { "200": { "description": "House removed" } }
       }
     },
@@ -187,7 +188,7 @@
       "get": {
         "summary": "Get all rooms for a house",
         "tags": ["Rooms"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
         "responses": { 
           "200": { 
             "description": "List of rooms retrieved",
@@ -205,14 +206,14 @@
       "post": {
         "summary": "Add a room to a house",
         "tags": ["Rooms"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": { "name": { "type": "string", "example": "Kitchen" } },
+                "properties": { "name": { "type": "string", "example": "Guest Room" } },
                 "required": ["name"]
               }
             }
@@ -225,7 +226,7 @@
       "put": {
         "summary": "Update room details",
         "tags": ["Rooms"],
-        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
         "requestBody": {
           "required": true,
           "content": {
@@ -242,7 +243,7 @@
       "delete": {
         "summary": "Remove a room",
         "tags": ["Rooms"],
-        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
         "responses": { "200": { "description": "Room removed successfully" } }
       }
     },
@@ -250,7 +251,7 @@
       "post": {
         "summary": "Add smart device to room",
         "tags": ["Devices"],
-        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
         "requestBody": {
           "required": true,
           "content": {
@@ -273,21 +274,21 @@
       "delete": {
         "summary": "Remove smart device",
         "tags": ["Devices"],
-        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string", "example": "device-1" } }],
         "responses": { "200": { "description": "Device removed" } }
       },
       "put": {
         "summary": "Update or Categorize a smart device",
         "tags": ["Devices"],
-        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string", "example": "device-1" } }],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": { 
-                  "name": { "type": "string", "example": "Living Room Lamp" },
-                  "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"] }
+                  "name": { "type": "string", "example": "Reading Lamp" },
+                  "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"], "example": "switch" }
                 }
               }
             }
@@ -300,7 +301,7 @@
       "get": {
         "summary": "Get smart device status",
         "tags": ["Devices"],
-        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string", "example": "device-1" } }],
         "responses": { 
             "200": { 
                 "description": "Status retrieved",
