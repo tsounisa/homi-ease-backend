@@ -9,8 +9,20 @@ export const getDevicesByRoomId = async (roomId) => {
   if (db.isConnected) {
     return await Device.find({ room: roomId });
   } else {
-    // FIX: Χρησιμοποιούμε 'roomId' (όπως στο mockData)
     return mockDevices.filter((d) => d.roomId === roomId);
+  }
+};
+
+// NEW: Get full device details instead of just status
+export const getDeviceById = async (deviceId) => {
+  if (db.isConnected) {
+    const device = await Device.findById(deviceId);
+    if (!device) throw new ApiError(404, 'Device not found');
+    return device;
+  } else {
+    const device = mockDevices.find((d) => d._id === deviceId);
+    if (!device) throw new ApiError(404, 'Device not found');
+    return device;
   }
 };
 
@@ -26,26 +38,13 @@ export const addDevice = async (roomId, deviceData) => {
     const device = {
       _id: `device-${uuidv4()}`,
       ...deviceData,
-      roomId: roomId, // FIX: roomId
-      status: 'OFF', // Default string status matching Swagger
+      roomId: roomId,
+      status: 'OFF',
       createdAt: new Date(),
     };
     mockDevices.push(device);
     if (room.devices) room.devices.push(device._id);
     return device;
-  }
-};
-
-export const getDeviceStatus = async (deviceId) => {
-  if (db.isConnected) {
-    const device = await Device.findById(deviceId);
-    if (!device) throw new ApiError(404, 'Device not found');
-    return { status: device.status, lastActive: new Date() };
-  } else {
-    const device = mockDevices.find((d) => d._id === deviceId);
-    if (!device) throw new ApiError(404, 'Device not found');
-    // Επιστρέφουμε τη δομή που περιμένει το Swagger
-    return { status: device.status, lastActive: new Date() };
   }
 };
 
@@ -74,11 +73,9 @@ export const removeDevice = async (deviceId) => {
     const index = mockDevices.findIndex((d) => d._id === deviceId);
     if (index === -1) throw new ApiError(404, 'Device not found');
     
-    // FIX: roomId access
     roomId = mockDevices[index].roomId;
     mockDevices.splice(index, 1);
 
-    // Remove from mock room
     const room = mockRooms.find((r) => r._id === roomId);
     if (room && room.devices) {
       room.devices = room.devices.filter((id) => id !== deviceId);

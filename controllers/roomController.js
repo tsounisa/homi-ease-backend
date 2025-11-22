@@ -11,6 +11,17 @@ export const getRooms = async (req, res, next) => {
   }
 };
 
+// NEW: Get Single Room
+export const getRoom = async (req, res, next) => {
+  try {
+    const { roomId } = req.params;
+    const room = await roomService.getRoomById(roomId);
+    sendSuccessResponse(res, 200, 'Room details fetched successfully', room);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const addRoomToHouse = async (req, res, next) => {
   try {
     const { houseId } = req.params;
@@ -22,10 +33,6 @@ export const addRoomToHouse = async (req, res, next) => {
   }
 };
 
-/**
- * @controller updateRoomDetails
- * @description Update room (e.g. name). Matches PUT /rooms/:roomId
- */
 export const updateRoomDetails = async (req, res, next) => {
   try {
     const { roomId } = req.params;
@@ -46,7 +53,3 @@ export const removeRoom = async (req, res, next) => {
     next(error);
   }
 };
-
-// (Keep existing temp/lighting controllers if you want, but we focus on updateRoomDetails)
-export const setRoomTemperature = async (req, res, next) => { /* ... */ };
-export const controlRoomLighting = async (req, res, next) => { /* ... */ };

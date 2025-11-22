@@ -223,6 +223,17 @@
       }
     },
     "/rooms/{roomId}": {
+      "get": {
+        "summary": "Get room details",
+        "tags": ["Rooms"],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
+        "responses": { 
+            "200": { 
+                "description": "Room details retrieved",
+                "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Room" } } }
+            } 
+        }
+      },
       "put": {
         "summary": "Update room details",
         "tags": ["Rooms"],
@@ -248,6 +259,17 @@
       }
     },
     "/rooms/{roomId}/devices": {
+      "get": {
+        "summary": "Get all devices for a room",
+        "tags": ["Devices"],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
+        "responses": { 
+            "200": { 
+                "description": "List of devices retrieved",
+                "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Device" } } } }
+            } 
+        }
+      },
       "post": {
         "summary": "Add smart device to room",
         "tags": ["Devices"],
@@ -271,6 +293,21 @@
       }
     },
     "/devices/{deviceId}": {
+      "get": {
+        "summary": "Get smart device details",
+        "tags": ["Devices"],
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string", "example": "device-1" } }],
+        "responses": { 
+            "200": { 
+                "description": "Device details retrieved",
+                "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/Device" }
+                    }
+                }
+            } 
+        }
+      },
       "delete": {
         "summary": "Remove smart device",
         "tags": ["Devices"],
@@ -288,36 +325,14 @@
                 "type": "object",
                 "properties": { 
                   "name": { "type": "string", "example": "Reading Lamp" },
-                  "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"], "example": "switch" }
+                  "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"], "example": "switch" },
+                  "status": { "type": "string", "example": "ON" }
                 }
               }
             }
           }
         },
         "responses": { "200": { "description": "Device updated" } }
-      }
-    },
-    "/devices/{deviceId}/status": {
-      "get": {
-        "summary": "Get smart device status",
-        "tags": ["Devices"],
-        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string", "example": "device-1" } }],
-        "responses": { 
-            "200": { 
-                "description": "Status retrieved",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "status": { "type": "string", "example": "ON" },
-                                "lastActive": { "type": "string", "format": "date-time" }
-                            }
-                        }
-                    }
-                }
-            } 
-        }
       }
     }
   }

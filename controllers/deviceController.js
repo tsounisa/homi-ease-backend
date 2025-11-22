@@ -11,22 +11,23 @@ export const getDevices = async (req, res, next) => {
   }
 };
 
+// NEW: Get Single Device
+export const getDevice = async (req, res, next) => {
+  try {
+    const { deviceId } = req.params;
+    const device = await deviceService.getDeviceById(deviceId);
+    sendSuccessResponse(res, 200, 'Device details fetched successfully', device);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const addDeviceToRoom = async (req, res, next) => {
   try {
     const { roomId } = req.params;
     const deviceData = req.body;
     const device = await deviceService.addDevice(roomId, deviceData);
     sendSuccessResponse(res, 201, 'Device added successfully', device);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getDeviceStatus = async (req, res, next) => {
-  try {
-    const { deviceId } = req.params;
-    const status = await deviceService.getDeviceStatus(deviceId);
-    sendSuccessResponse(res, 200, 'Status retrieved', status);
   } catch (error) {
     next(error);
   }

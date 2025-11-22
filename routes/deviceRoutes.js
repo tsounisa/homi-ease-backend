@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {
-  getDeviceStatus,
+  getDevice, // <-- NEW IMPORT
   updateDeviceDetails,
   removeDevice
 } from '../controllers/deviceController.js';
@@ -11,9 +11,9 @@ const router = Router();
 
 router.use(protect);
 
-// @route   GET /api/v1/devices/:deviceId/status
-// @desc    Get smart device status
-router.get('/:deviceId/status', getDeviceStatus);
+// @route   GET /api/v1/devices/:deviceId
+// @desc    Get smart device details
+router.get('/:deviceId', getDevice); // <-- Clean RESTful GET
 
 // @route   PUT /api/v1/devices/:deviceId
 // @desc    Update device details
