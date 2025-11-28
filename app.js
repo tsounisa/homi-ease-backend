@@ -6,8 +6,16 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { ApiError } from './utils/ApiError.js';
 import apiRouter from './routes/index.js';
 
+import swaggerUi from 'swagger-ui-express';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const swaggerDocument = require('./docs/swagger.json');
+
 // Initialize Express app
 const app = express();
+
+// --- Swagger Documentation Setup ---
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Disable ETag generation
 app.disable('etag');

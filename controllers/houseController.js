@@ -18,6 +18,26 @@ export const getHouses = async (req, res, next) => {
 };
 
 /**
+ * @controller getHouse
+ * @description Get details for a specific house.
+ * @route GET /api/v1/houses/:houseId
+ * @access Private
+ */
+export const getHouse = async (req, res, next) => {
+  try {
+    const { houseId } = req.params;
+    const userId = req.user._id;
+    
+    // Κλήση στο service (θα πρέπει να το φτιάξουμε στο επόμενο βήμα)
+    const house = await houseService.getHouseById(houseId, userId);
+    
+    sendSuccessResponse(res, 200, 'House details fetched successfully', house);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * @controller addHouse
  * @description Add a new house.
  * @route POST /api/v1/houses
@@ -29,6 +49,27 @@ export const addHouse = async (req, res, next) => {
     const { name } = req.body;
     const house = await houseService.addHouse(userId, { name });
     sendSuccessResponse(res, 201, 'House added successfully', house);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @controller updateHouse
+ * @description Update house details (e.g. name).
+ * @route PUT /api/v1/houses/:houseId
+ * @access Private
+ */
+export const updateHouse = async (req, res, next) => {
+  try {
+    const { houseId } = req.params;
+    const userId = req.user._id;
+    const updates = req.body;
+
+    // Κλήση στο service (θα πρέπει να το φτιάξουμε στο επόμενο βήμα)
+    const updatedHouse = await houseService.updateHouse(houseId, userId, updates);
+
+    sendSuccessResponse(res, 200, 'House updated successfully', updatedHouse);
   } catch (error) {
     next(error);
   }

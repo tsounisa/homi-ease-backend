@@ -1,24 +1,24 @@
 import { Router } from 'express';
 import {
-  createUser,
   getUserStatistics,
   sendNotification,
   customizeHomeScreen,
   addWidget,
   getMe,
-} from '../controllers/userController.js';
+} from '../controllers/userController.js'; // Αφαιρέθηκε το createUser από τα imports
 import { protect } from '../middleware/auth.js';
 import { validate } from '../middleware/validation.js';
 
 const router = Router();
 
-// @route   POST /api/v1/users
-// @desc    Create account
-// @access  Public
-router.post('/', validate(), createUser); // Add validation schema later
-
 // --- All routes below are protected ---
 router.use(protect);
+
+// @route   GET /api/v1/users/me
+// @desc    Get current user
+// @access  Private
+// Το βάζω ψηλά για να μην μπερδευτεί με το /:userId
+router.get('/me', getMe); 
 
 // @route   GET /api/v1/users/:userId/statistics
 // @desc    View statistics
@@ -39,10 +39,5 @@ router.put('/:userId/home', validate(), customizeHomeScreen);
 // @desc    Add widgets
 // @access  Private
 router.post('/:userId/widgets', validate(), addWidget);
-
-// @route   GET /api/v1/users/me
-// @desc    Get current user
-// @access  Private
-router.get('/me', getMe);
 
 export default router;
