@@ -4,7 +4,7 @@ import { login, getMe } from '../controllers/authController.js';
 import { createUser } from '../controllers/userController.js';
 import { validate } from '../middleware/validation.js';
 // 2. Import your authentication middleware (Verify the file name!)
-import { protect } from '../middleware/authMiddleware.js'; 
+import { protect } from '../middleware/auth.js'; 
 
 const router = Router();
 
