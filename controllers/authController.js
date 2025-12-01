@@ -29,3 +29,19 @@ export const login = async (req, res, next) => {
 // This logic is in userController, but authController is a good place
 // to group auth-related functions. We'll keep the actual logic
 // in userController as per the OpenAPI spec path.
+
+/**
+ * @controller getMe
+ * @description Get current logged-in user's profile
+ * @route GET /api/v1/auth/me
+ * @access Private
+ */
+export const getMe = async (req, res, next) => {
+  try {
+    // req.user is populated by your 'protect' middleware
+    // We send it back to the client so they know who is logged in.
+    sendSuccessResponse(res, 200, 'User profile retrieved', req.user);
+  } catch (error) {
+    next(error);
+  }
+};

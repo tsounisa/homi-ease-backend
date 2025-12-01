@@ -111,6 +111,44 @@
         }
       }
     },
+    "/auth/me": {
+      "get": {
+        "summary": "Get current user profile",
+        "description": "Validates the Bearer token and returns the current user's info. Used by Frontend AuthContext to persist sessions.",
+        "tags": ["Auth"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "example": "user-1" },
+                        "name": { "type": "string", "example": "Demo User" },
+                        "email": { "type": "string", "example": "user@example.com" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized (Invalid or missing token)"
+          }
+        }
+      }
+    },
     "/houses": {
       "get": {
         "summary": "Get user's houses",
