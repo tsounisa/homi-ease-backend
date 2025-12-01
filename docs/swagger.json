@@ -103,7 +103,37 @@
         },
         "responses": {
           "200": {
-            "description": "Login successful"
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Login successful" },
+                    "data": {
+                      "type": "object",
+                      "description": "Payload containing the JWT and User info",
+                      "properties": {
+                        "token": { 
+                          "type": "string", 
+                          "description": "JWT Bearer Token",
+                          "example": "eyJhbGciOiJIUzI1Ni..." 
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "_id": { "type": "string", "example": "user-123" },
+                            "name": { "type": "string", "example": "John Doe" },
+                            "email": { "type": "string", "example": "john@example.com" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Invalid credentials"
