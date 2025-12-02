@@ -2,34 +2,46 @@ name: Backend CI/CD
 
 on:
   push:
-    branches: [ "main" ]       # Trigger 1: Runs AFTER Merge (Deploy)
+    branches:
+      - '**'         # Run CI on all branches (feature branches AND main)
   pull_request:
-    branches: [ "main" ]       # Trigger 2: Runs BEFORE Merge (Test Only)
+    branches: [ "main" ] # Required check before merging into main
 
 jobs:
-  test-and-deploy:
+  # 1. CI JOB: Test Phase (Runs on all pushes and PRs)
+  ci_check:
+    name: Continuous Integration Check
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v3
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20.x'
+        node-version: '20.x' 
+        cache: 'npm'
 
     - name: Install Dependencies
       run: npm install
 
+    # Runs the npm test script (currently the dummy script)
     - name: Run Tests
       run: npm test
 
-    # DEPLOY STEP:
-    # This 'if' condition ensures we ONLY deploy when the event is a PUSH to MAIN.
-    # It prevents the PR checks from accidentally deploying to production.
-    - name: Deploy to Render
-      # Only deploy if tests pass AND it's a push to main (not a PR)
-      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+  # 2. CD JOB: Deployment Phase (Runs ONLY after CI passes and ONLY on 'main' push)
+  cd_deploy:
+    name: Continuous Deployment to Render
+    runs-on: ubuntu-latest
+    
+    # CRITICAL: This job waits for ci_check to succeed first
+    needs: [ci_check] 
+    
+    # This condition ensures deployment ONLY runs when merging into the main branch
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Deploy to Render via Hook
       run: |
         curl -X GET ${{ secrets.RENDER_DEPLOY_HOOK }}
