@@ -38,14 +38,12 @@ export const loginUser = async (email, password) => {
     // Mock Data Logic
     user = mockUsers.find((u) => u.email === email);
     if (user) {
-      // TEMPORARY: For debugging mock data login issue
-      passwordMatch = (password === 'password123');
-      // ORIGINAL: passwordMatch = await bcrypt.compare(password, user.password);
+      passwordMatch = await bcrypt.compare(password, user.password);
     }
   }
 
   if (!user || !passwordMatch) {
-    throw new ApiError(401, 'Invalid email or password');
+    throw new ApiError(401, 'Invalid credentials');
   }
 
   // Remove password from user object before returning
