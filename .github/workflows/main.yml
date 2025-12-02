@@ -1,0 +1,35 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [ "main" ]       # Trigger 1: Runs AFTER Merge (Deploy)
+  pull_request:
+    branches: [ "main" ]       # Trigger 2: Runs BEFORE Merge (Test Only)
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run Tests
+      run: npm test
+
+    # DEPLOY STEP:
+    # This 'if' condition ensures we ONLY deploy when the event is a PUSH to MAIN.
+    # It prevents the PR checks from accidentally deploying to production.
+    - name: Deploy to Render
+      # Only deploy if tests pass AND it's a push to main (not a PR)
+      if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        curl -X GET ${{ secrets.RENDER_DEPLOY_HOOK }}
