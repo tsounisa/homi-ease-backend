@@ -9,7 +9,7 @@ import apiRouter from './routes/index.js';
 import swaggerUi from 'swagger-ui-express';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const swaggerDocument = require('./docs/swagger.json');
+const swaggerDocument = require('../docs/swagger.json');
 
 // Initialize Express app
 const app = express();

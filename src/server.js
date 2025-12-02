@@ -26,4 +26,6 @@ process.on('unhandledRejection', (err) => {
   });
 });
 
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}

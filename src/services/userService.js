@@ -4,6 +4,7 @@ import { db } from '../config/database.js';
 import { mockUsers, mockDevices } from '../config/mockData.js';
 import { v4 as uuidv4 } from 'uuid'; // Use UUID for mock IDs
 import { logger } from '../utils/logger.js';
+import bcrypt from 'bcryptjs';
 
 /**
  * @function createUser
