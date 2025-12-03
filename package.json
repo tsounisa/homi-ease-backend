@@ -20,6 +20,7 @@
       "src/**/*.js",
       "!src/server.js",
       "!src/app.js",
+      "!src/routes/**/*.js",
       "!**/node_modules/**"
     ],
     
