@@ -7,8 +7,8 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000",
-      "description": "Local Development Server"
+      "url": "/api/v1",
+      "description": "Backend API Server"
     }
   ],
   "components": {
@@ -450,6 +450,17 @@
       }
     },
     "/automations": {
+      "get": {
+        "summary": "Get user's automations",
+        "tags": ["Automations"],
+        "responses": {
+          "200": {
+            "description": "List of automations",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Automation" } } } }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
       "post": {
         "summary": "Create automation",
         "tags": ["Automations"],
@@ -465,7 +476,50 @@
         }
       }
     },
+    "/automations/{automationId}": {
+      "get": {
+        "summary": "Get automation details",
+        "tags": ["Automations"],
+        "parameters": [{ "name": "automationId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Automation details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Automation" } } } },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "summary": "Update automation",
+        "tags": ["Automations"],
+        "parameters": [{ "name": "automationId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Automation" } } }
+        },
+        "responses": { 
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Automation" } } } },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete automation",
+        "tags": ["Automations"],
+        "parameters": [{ "name": "automationId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Deleted" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
     "/scenarios": {
+      "get": {
+        "summary": "Get user's scenarios",
+        "tags": ["Scenarios"],
+        "responses": {
+          "200": {
+            "description": "List of scenarios",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Scenario" } } } }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
       "post": {
         "summary": "Create scenario",
         "tags": ["Scenarios"],
@@ -478,6 +532,38 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scenario" } } }
           },
           "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/scenarios/{scenarioId}": {
+      "get": {
+        "summary": "Get scenario details",
+        "tags": ["Scenarios"],
+        "parameters": [{ "name": "scenarioId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Scenario details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scenario" } } } },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "summary": "Update scenario",
+        "tags": ["Scenarios"],
+        "parameters": [{ "name": "scenarioId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scenario" } } }
+        },
+        "responses": { 
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scenario" } } } },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete scenario",
+        "tags": ["Scenarios"],
+        "parameters": [{ "name": "scenarioId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Deleted" },
+          "404": { "description": "Not found" }
         }
       }
     }
