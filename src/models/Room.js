@@ -7,7 +7,7 @@ const roomSchema = new Schema(
       required: [true, 'Room name is required'],
       trim: true,
     },
-    house: {
+    houseId: {
       type: Schema.Types.ObjectId,
       ref: 'House',
       required: true,
@@ -24,7 +24,7 @@ const roomSchema = new Schema(
         default: 21,
       },
       lighting: {
-        type: Number, // Brightness percentage
+        type: Number,
         default: 100,
         min: 0,
         max: 100,

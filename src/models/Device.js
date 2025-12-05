@@ -14,15 +14,14 @@ const deviceSchema = new Schema(
     },
     type: {
       type: String,
-      required: true,
-      enum: ['light', 'thermostat', 'security', 'media', 'other'],
+      required: [true, 'Device type is required'],
+      enum: {
+        values: ['light', 'thermostat', 'security', 'media', 'other'],
+        message: '{VALUE} is not a supported device type',
+      },
       default: 'other',
     },
-    category: {
-      type: String,
-      required: [true, 'Device category is required'],
-      trim: true,
-    },
+    
     // Using Mixed type to allow flexible status properties
     status: {
       type: Schema.Types.Mixed,

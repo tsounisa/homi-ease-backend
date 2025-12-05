@@ -13,7 +13,6 @@ export const getDevicesByRoomId = async (roomId) => {
   }
 };
 
-// NEW: Get full device details instead of just status
 export const getDeviceById = async (deviceId) => {
   if (db.isConnected) {
     const device = await Device.findById(deviceId);
@@ -37,11 +36,13 @@ export const addDevice = async (roomId, deviceData) => {
 
     const device = {
       _id: `device-${uuidv4()}`,
-      ...deviceData,
+      name: deviceData.name,
+      type: deviceData.type || 'other', //Default fallback
       roomId: roomId,
-      status: 'OFF',
+      status: deviceData.status || { isOn: false },
       createdAt: new Date(),
     };
+    
     mockDevices.push(device);
     if (room.devices) room.devices.push(device._id);
     return device;

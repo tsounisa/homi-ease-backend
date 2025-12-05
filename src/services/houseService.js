@@ -13,10 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
  */
 export const getHousesForUser = async (userId) => {
   if (db.isConnected) {
-    // MongoDB Logic (Assuming Mongoose model still uses 'owner' or needs update)
-    return await House.find({ owner: userId });
+    return await House.find({ userId });
   } else {
-    // Mock Data Logic - UPDATED: uses userId matching Swagger
     return mockHouses.filter((h) => h.userId === userId);
   }
 };
@@ -31,13 +29,11 @@ export const getHousesForUser = async (userId) => {
 export const getHouseById = async (houseId, userId) => {
   let house;
   if (db.isConnected) {
-    house = await House.findOne({ _id: houseId, owner: userId }).populate('rooms');
+    house = await House.findOne({ _id: houseId, userId }).populate('rooms');
   } else {
-    // Mock Data Logic - UPDATED: uses userId
     house = mockHouses.find((h) => h._id === houseId && h.userId === userId);
     if (house) {
       // Populate rooms manually from mockRooms
-      // Note: mockRooms must have 'houseId' matching this house
       house = { ...house }; 
       house.rooms = (house.rooms || []).map(roomId => mockRooms.find(r => r._id === roomId)).filter(Boolean);
     }
@@ -58,15 +54,15 @@ export const getHouseById = async (houseId, userId) => {
  */
 export const addHouse = async (userId, houseData) => {
   if (db.isConnected) {
-    const house = await House.create({ ...houseData, owner: userId });
+    // UPDATED: Creation uses 'userId' (ES6 shorthand)
+    const house = await House.create({ ...houseData, userId });
     await User.findByIdAndUpdate(userId, { $push: { houses: house._id } });
     return house;
   } else {
-    // Mock Data Logic - UPDATED
     const house = {
       _id: `house-${uuidv4()}`,
       ...houseData,
-      userId: userId, // <--- Changed from owner to userId
+      userId, 
       rooms: [],
       createdAt: new Date(),
     };
@@ -91,7 +87,7 @@ export const addHouse = async (userId, houseData) => {
 export const updateHouse = async (houseId, userId, updates) => {
   if (db.isConnected) {
     const house = await House.findOneAndUpdate(
-      { _id: houseId, owner: userId },
+      { _id: houseId, userId },
       updates,
       { new: true, runValidators: true }
     );
@@ -100,7 +96,6 @@ export const updateHouse = async (houseId, userId, updates) => {
     }
     return house;
   } else {
-    // Mock Data Logic - UPDATED: uses userId
     const house = mockHouses.find((h) => h._id === houseId && h.userId === userId);
     if (!house) {
       throw new ApiError(404, 'House not found or you are not the owner');
@@ -119,14 +114,13 @@ export const updateHouse = async (houseId, userId, updates) => {
  */
 export const removeHouse = async (houseId, userId) => {
   if (db.isConnected) {
-    const house = await House.findOne({ _id: houseId, owner: userId });
+    const house = await House.findOne({ _id: houseId, userId });
     if (!house) {
       throw new ApiError(404, 'House not found or you are not the owner');
     }
     await house.deleteOne();
     await User.findByIdAndUpdate(userId, { $pull: { houses: houseId } });
   } else {
-    // Mock Data Logic - UPDATED: uses userId
     const houseIndex = mockHouses.findIndex(
       (h) => h._id === houseId && h.userId === userId
     );

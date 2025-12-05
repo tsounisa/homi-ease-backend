@@ -7,7 +7,7 @@ const houseSchema = new Schema(
       required: [true, 'House name is required'],
       trim: true,
     },
-    owner: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,

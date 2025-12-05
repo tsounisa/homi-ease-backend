@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const getRoomsInHouse = async (houseId) => {
   if (db.isConnected) {
-    return await Room.find({ house: houseId });
+    return await Room.find({ houseId });
   } else {
     return mockRooms.filter((r) => r.houseId === houseId);
   }
@@ -28,7 +28,7 @@ export const getRoomById = async (roomId) => {
 
 export const addRoomToHouse = async (houseId, roomData) => {
   if (db.isConnected) {
-    const room = await Room.create({ ...roomData, house: houseId });
+    const room = await Room.create({ ...roomData, houseId });
     await House.findByIdAndUpdate(houseId, { $push: { rooms: room._id } });
     return room;
   } else {
@@ -38,7 +38,7 @@ export const addRoomToHouse = async (houseId, roomData) => {
     const room = {
       _id: `room-${uuidv4()}`,
       ...roomData,
-      houseId: houseId,
+      houseId, 
       devices: [],
       settings: { temperature: 21, lighting: 100 },
       createdAt: new Date(),
@@ -68,7 +68,9 @@ export const removeRoom = async (roomId) => {
   if (db.isConnected) {
     const room = await Room.findById(roomId);
     if (!room) throw new ApiError(404, 'Room not found');
-    houseId = room.house;
+    
+    houseId = room.houseId;
+    
     await room.deleteOne();
     await House.findByIdAndUpdate(houseId, { $pull: { rooms: roomId } });
   } else {

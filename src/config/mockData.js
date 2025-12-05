@@ -66,13 +66,12 @@ export const loadMockData = async () => {
   });
 
   // --- MOCK DEVICES ---
-  // Types match Swagger enum: ["switch", "sensor", "thermostat"]
   mockDevices.push({
     _id: 'device-1',
     name: 'Living Room Lamp',
     roomId: 'room-1',         
-    type: 'switch',
-    status: 'ON',    
+    type: 'light', // Was 'switch'
+    status: { isOn: true, brightness: 100 }, // Was 'ON'
   });
   
   mockDevices.push({
@@ -80,15 +79,15 @@ export const loadMockData = async () => {
     name: 'Main Thermostat',
     roomId: 'room-1',
     type: 'thermostat',
-    status: '21°C',
+    status: { temperature: 21, mode: 'heat' }, // Was '21°C'
   });
   
   mockDevices.push({
     _id: 'device-3',
     name: 'Bedroom Light',
     roomId: 'room-2',         
-    type: 'switch',
-    status: 'OFF',
+    type: 'light', // Was 'switch'
+    status: { isOn: false, brightness: 0 }, // Was 'OFF'
   });
 
   // --- MOCK AVAILABLE DEVICES (for pairing) ---
@@ -96,18 +95,18 @@ export const loadMockData = async () => {
     _id: 'available-device-1',
     userId: 'user-1', 
     name: 'Philips Hue White Smart',
-    type: 'switch',
+    type: 'light', // Was 'switch'
     description: 'Smart white light bulb',
-    status: 'OFF', 
+    status: { isOn: false }, 
   });
   
   mockAvailableDevices.push({
     _id: 'available-device-2',
     userId: 'user-1',
     name: 'Motion Sensor',
-    type: 'sensor',
+    type: 'security', // Was 'sensor'
     description: 'PIR motion sensor',
-    status: 'IDLE', 
+    status: { active: false }, 
   });
 
   // --- MOCK AUTOMATIONS ---
@@ -116,7 +115,7 @@ export const loadMockData = async () => {
     name: 'Evening Light Routine',
     userId: 'user-1',
     trigger: { type: 'Time', value: '7:00 PM Daily' },
-    action: { deviceId: 'device-1', command: { status: 'ON' } },
+    action: { deviceId: 'device-1', command: { isOn: true } },
   });
 
   // --- MOCK SCENARIOS ---
@@ -125,8 +124,8 @@ export const loadMockData = async () => {
     name: 'Morning Wake-Up',
     userId: 'user-1',
     actions: [
-      { deviceId: 'device-3', command: { status: 'ON' } },
-      { deviceId: 'device-2', command: { status: '22°C' } },
+      { deviceId: 'device-3', command: { isOn: true } },
+      { deviceId: 'device-2', command: { temperature: 22 } },
     ],
   });
 };

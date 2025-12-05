@@ -8,7 +8,7 @@
   "servers": [
     {
       "url": "/api/v1",
-      "description": "API Server"
+      "description": "Backend API Server"
     }
   ],
   "components": {
@@ -20,10 +20,19 @@
       }
     },
     "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "user-1" },
+          "name": { "type": "string", "example": "Demo User" },
+          "email": { "type": "string", "example": "user@example.com" },
+          "houses": { "type": "array", "items": { "type": "string", "example": "house-1" } }
+        }
+      },
       "House": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "example": "house-1" },
+          "_id": { "type": "string", "example": "house-1" },
           "name": { "type": "string", "example": "Demo User's Home" },
           "userId": { "type": "string", "description": "Foreign Key: Owner of the house", "example": "user-1" }
         }
@@ -31,19 +40,71 @@
       "Room": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "example": "room-1" },
+          "_id": { "type": "string", "example": "room-1" },
           "name": { "type": "string", "example": "Living Room" },
-          "houseId": { "type": "string", "description": "Foreign Key: House this room belongs to", "example": "house-1" }
+          "houseId": { "type": "string", "description": "Foreign Key: House this room belongs to", "example": "house-1" },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "temperature": { "type": "number", "example": 21 },
+              "lighting": { "type": "number", "example": 80 }
+            }
+          }
         }
       },
       "Device": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "example": "device-1" },
+          "_id": { "type": "string", "example": "device-1" },
           "name": { "type": "string", "example": "Living Room Lamp" },
-          "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"], "example": "switch" },
-          "status": { "type": "string", "example": "ON" },
+          "type": { 
+            "type": "string", 
+            "enum": ["light", "thermostat", "security", "media", "other"], 
+            "example": "light" 
+          },
+          "status": { 
+            "type": "object", 
+            "example": { "isOn": true, "brightness": 100 } 
+          },
           "roomId": { "type": "string", "description": "Foreign Key: Room this device belongs to", "example": "room-1" }
+        }
+      },
+      "Automation": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "auto-1" },
+          "name": { "type": "string", "example": "Evening Light Routine" },
+          "trigger": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["Time", "Sensor", "Manual"] },
+              "value": { "type": "string", "example": "7:00 PM Daily" }
+            }
+          },
+          "action": {
+            "type": "object",
+            "properties": {
+              "deviceId": { "type": "string", "example": "device-1" },
+              "command": { "type": "object", "example": { "isOn": true } }
+            }
+          }
+        }
+      },
+      "Scenario": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "scene-1" },
+          "name": { "type": "string", "example": "Morning Wake-Up" },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "deviceId": { "type": "string", "example": "device-3" },
+                "command": { "type": "object", "example": { "isOn": true } }
+              }
+            }
+          }
         }
       }
     }
@@ -58,6 +119,7 @@
       "post": {
         "summary": "Register a new account",
         "tags": ["Auth"],
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -67,7 +129,7 @@
                 "properties": {
                   "name": { "type": "string", "example": "New User" },
                   "email": { "type": "string", "format": "email", "example": "newuser@test.com" },
-                  "password": { "type": "string", "format": "password", "minLength": 8, "example": "password123" }
+                  "password": { "type": "string", "format": "password", "minLength": 6, "example": "password123" }
                 },
                 "required": ["name", "email", "password"]
               }
@@ -75,9 +137,11 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "User registered successfully"
-          }
+          "201": { 
+            "description": "User registered successfully",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
+          },
+          "400": { "description": "Invalid input" }
         }
       }
     },
@@ -86,6 +150,7 @@
         "summary": "Login to account",
         "tags": ["Auth"],
         "description": "Use the credentials from mockData.js for instant access.",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -113,19 +178,14 @@
                     "message": { "type": "string", "example": "Login successful" },
                     "data": {
                       "type": "object",
-                      "description": "Payload containing the JWT and User info",
                       "properties": {
-                        "token": { 
-                          "type": "string", 
-                          "description": "JWT Bearer Token",
-                          "example": "eyJhbGciOiJIUzI1Ni..." 
-                        },
+                        "token": { "type": "string", "example": "eyJhbGciOiJIUzI1Ni..." },
                         "user": {
                           "type": "object",
                           "properties": {
-                            "_id": { "type": "string", "example": "user-123" },
-                            "name": { "type": "string", "example": "John Doe" },
-                            "email": { "type": "string", "example": "john@example.com" }
+                            "_id": { "type": "string", "example": "user-1" },
+                            "name": { "type": "string", "example": "Demo User" },
+                            "email": { "type": "string", "example": "user@example.com" }
                           }
                         }
                       }
@@ -135,22 +195,14 @@
               }
             }
           },
-          "401": {
-            "description": "Invalid credentials"
-          }
+          "401": { "description": "Invalid credentials" }
         }
       }
     },
     "/auth/me": {
       "get": {
         "summary": "Get current user profile",
-        "description": "Validates the Bearer token and returns the current user's info. Used by Frontend AuthContext to persist sessions.",
         "tags": ["Auth"],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
         "responses": {
           "200": {
             "description": "User profile retrieved successfully",
@@ -163,7 +215,7 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "id": { "type": "string", "example": "user-1" },
+                        "_id": { "type": "string", "example": "user-1" },
                         "name": { "type": "string", "example": "Demo User" },
                         "email": { "type": "string", "example": "user@example.com" }
                       }
@@ -173,9 +225,7 @@
               }
             }
           },
-          "401": {
-            "description": "Not authorized (Invalid or missing token)"
-          }
+          "401": { "description": "Not authorized" }
         }
       }
     },
@@ -186,15 +236,9 @@
         "responses": {
           "200": {
             "description": "List of houses",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/House" }
-                }
-              }
-            }
-          }
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/House" } } } }
+          },
+          "401": { "description": "Unauthorized" }
         }
       },
       "post": {
@@ -212,69 +256,66 @@
             }
           }
         },
-        "responses": { "201": { "description": "House created" } }
+        "responses": { 
+          "201": { 
+            "description": "House created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/House" } } }
+          },
+          "401": { "description": "Unauthorized" }
+        }
       }
     },
     "/houses/{houseId}": {
       "get": {
         "summary": "Get house details",
         "tags": ["Houses"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "responses": { 
-          "200": { 
-            "description": "House details",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/House" } } }
-          },
+          "200": { "description": "House details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/House" } } } },
+          "401": { "description": "Unauthorized" },
           "404": { "description": "House not found" }
         }
       },
       "put": {
         "summary": "Update house details",
         "tags": ["Houses"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "requestBody": {
           "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": { "name": { "type": "string", "example": "Renovated House Name" } }
-              }
-            }
-          }
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" } } } } }
         },
-        "responses": { "200": { "description": "House updated" } }
+        "responses": { 
+          "200": { "description": "House updated" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "House not found" }
+        }
       },
       "delete": {
         "summary": "Remove a house",
         "tags": ["Houses"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
-        "responses": { "200": { "description": "House removed" } }
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "House removed" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "House not found" }
+        }
       }
     },
     "/houses/{houseId}/rooms": {
       "get": {
         "summary": "Get all rooms for a house",
         "tags": ["Rooms"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "responses": { 
-          "200": { 
-            "description": "List of rooms retrieved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/Room" }
-                }
-              }
-            }
-          } 
+          "200": { "description": "List of rooms", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Room" } } } } },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "House not found" }
         }
       },
       "post": {
         "summary": "Add a room to a house",
         "tags": ["Rooms"],
-        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string", "example": "house-1" } }],
+        "parameters": [{ "name": "houseId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "requestBody": {
           "required": true,
           "content": {
@@ -287,61 +328,67 @@
             }
           }
         },
-        "responses": { "201": { "description": "Room added successfully" } }
+        "responses": { 
+          "201": { 
+            "description": "Room added",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Room" } } }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "House not found" }
+        }
       }
     },
     "/rooms/{roomId}": {
       "get": {
         "summary": "Get room details",
         "tags": ["Rooms"],
-        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "responses": { 
-            "200": { 
-                "description": "Room details retrieved",
-                "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Room" } } }
-            } 
+            "200": { "description": "Room details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Room" } } } },
+            "401": { "description": "Unauthorized" },
+            "404": { "description": "Room not found" }
         }
       },
       "put": {
         "summary": "Update room details",
         "tags": ["Rooms"],
-        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "requestBody": {
           "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": { "name": { "type": "string", "example": "Master Bedroom" } }
-              }
-            }
-          }
+          "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" } } } } }
         },
-        "responses": { "200": { "description": "Room updated successfully" } }
+        "responses": { 
+          "200": { "description": "Room updated" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Room not found" }
+        }
       },
       "delete": {
         "summary": "Remove a room",
         "tags": ["Rooms"],
-        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
-        "responses": { "200": { "description": "Room removed successfully" } }
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Room removed" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Room not found" }
+        }
       }
     },
     "/rooms/{roomId}/devices": {
       "get": {
         "summary": "Get all devices for a room",
         "tags": ["Devices"],
-        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "responses": { 
-            "200": { 
-                "description": "List of devices retrieved",
-                "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Device" } } } }
-            } 
+            "200": { "description": "List of devices", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Device" } } } } },
+            "401": { "description": "Unauthorized" },
+            "404": { "description": "Room not found" }
         }
       },
       "post": {
         "summary": "Add smart device to room",
         "tags": ["Devices"],
-        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string", "example": "room-1" } }],
+        "parameters": [{ "name": "roomId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "requestBody": {
           "required": true,
           "content": {
@@ -350,57 +397,174 @@
                 "type": "object",
                 "properties": { 
                   "name": { "type": "string", "example": "Ceiling Light" },
-                  "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"], "example": "switch" }
+                  "type": { "type": "string", "enum": ["light", "thermostat", "security", "media", "other"], "example": "light" }
                 },
                 "required": ["name", "type"]
               }
             }
           }
         },
-        "responses": { "201": { "description": "Device added" } }
+        "responses": { 
+          "201": { 
+            "description": "Device added",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Device" } } }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Room not found" }
+        }
       }
     },
     "/devices/{deviceId}": {
       "get": {
         "summary": "Get smart device details",
         "tags": ["Devices"],
-        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string", "example": "device-1" } }],
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "responses": { 
-            "200": { 
-                "description": "Device details retrieved",
-                "content": {
-                    "application/json": {
-                        "schema": { "$ref": "#/components/schemas/Device" }
-                    }
-                }
-            } 
+            "200": { "description": "Device details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Device" } } } },
+            "401": { "description": "Unauthorized" },
+            "404": { "description": "Device not found" }
         }
       },
       "delete": {
         "summary": "Remove smart device",
         "tags": ["Devices"],
-        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string", "example": "device-1" } }],
-        "responses": { "200": { "description": "Device removed" } }
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Device removed" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Device not found" }
+        }
       },
       "put": {
-        "summary": "Update or Categorize a smart device",
+        "summary": "Update smart device",
         "tags": ["Devices"],
-        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string", "example": "device-1" } }],
+        "parameters": [{ "name": "deviceId", "in": "path", "required": true, "schema": { "type": "string" } }],
         "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": { 
-                  "name": { "type": "string", "example": "Reading Lamp" },
-                  "type": { "type": "string", "enum": ["switch", "sensor", "thermostat"], "example": "switch" },
-                  "status": { "type": "string", "example": "ON" }
-                }
-              }
-            }
-          }
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Device" } } }
         },
-        "responses": { "200": { "description": "Device updated" } }
+        "responses": { 
+          "200": { "description": "Device updated" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Device not found" }
+        }
+      }
+    },
+    "/automations": {
+      "get": {
+        "summary": "Get user's automations",
+        "tags": ["Automations"],
+        "responses": {
+          "200": {
+            "description": "List of automations",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Automation" } } } }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Create automation",
+        "tags": ["Automations"],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Automation" } } }
+        },
+        "responses": { 
+          "201": { 
+            "description": "Automation created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Automation" } } }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/automations/{automationId}": {
+      "get": {
+        "summary": "Get automation details",
+        "tags": ["Automations"],
+        "parameters": [{ "name": "automationId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Automation details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Automation" } } } },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "summary": "Update automation",
+        "tags": ["Automations"],
+        "parameters": [{ "name": "automationId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Automation" } } }
+        },
+        "responses": { 
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Automation" } } } },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete automation",
+        "tags": ["Automations"],
+        "parameters": [{ "name": "automationId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Deleted" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/scenarios": {
+      "get": {
+        "summary": "Get user's scenarios",
+        "tags": ["Scenarios"],
+        "responses": {
+          "200": {
+            "description": "List of scenarios",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Scenario" } } } }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Create scenario",
+        "tags": ["Scenarios"],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scenario" } } }
+        },
+        "responses": { 
+          "201": { 
+            "description": "Scenario created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scenario" } } }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/scenarios/{scenarioId}": {
+      "get": {
+        "summary": "Get scenario details",
+        "tags": ["Scenarios"],
+        "parameters": [{ "name": "scenarioId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Scenario details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scenario" } } } },
+          "404": { "description": "Not found" }
+        }
+      },
+      "put": {
+        "summary": "Update scenario",
+        "tags": ["Scenarios"],
+        "parameters": [{ "name": "scenarioId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scenario" } } }
+        },
+        "responses": { 
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Scenario" } } } },
+          "404": { "description": "Not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete scenario",
+        "tags": ["Scenarios"],
+        "parameters": [{ "name": "scenarioId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { 
+          "200": { "description": "Deleted" },
+          "404": { "description": "Not found" }
+        }
       }
     }
   }
