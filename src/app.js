@@ -40,6 +40,11 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' })); // Parse URL-enc
 // --- Mount API Routes ---
 app.use('/api/v1', apiRouter);
 
+// Health check / root route
+app.get('/', (req, res) => {
+  res.send('HomiEase API is running');
+});
+
 // --- 404 Not Found Handler ---
 // Handles any request that doesn't match the routes above
 app.all('*', (req, res, next) => {
