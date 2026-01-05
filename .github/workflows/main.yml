@@ -33,23 +33,22 @@ jobs:
         npm start &
         sleep 15
 
-        - name: Install k6
+    - name: Install k6
       run: |
         sudo apt-get update
         sudo apt-get install -y k6
-
 
     - name: Run k6 Login Load & Spike Tests
       env:
         BASE_URL: http://localhost:8080/api/v1
       run: |
-        ./k6 run k6/login-tests.js
+        k6 run k6/login-tests.js
 
     - name: Run k6 Houses Load & Spike Tests
       env:
         BASE_URL: http://localhost:8080/api/v1
       run: |
-        ./k6 run k6/houses-tests.js
+        k6 run k6/houses-tests.js
 
   cd_deploy:
     name: Continuous Deployment to Render
