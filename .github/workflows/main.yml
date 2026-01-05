@@ -33,9 +33,11 @@ jobs:
         npm start &
         sleep 15
 
-    - name: Install k6
+        - name: Install k6
       run: |
-        curl -s https://raw.githubusercontent.com/grafana/k6/master/install.sh | bash
+        sudo apt-get update
+        sudo apt-get install -y k6
+
 
     - name: Run k6 Login Load & Spike Tests
       env:
