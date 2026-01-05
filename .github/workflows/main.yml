@@ -31,7 +31,7 @@ jobs:
     - name: Start Backend Server
       run: |
         npm start &
-        sleep 15
+        sleep 25
 
     - name: Setup k6
       uses: grafana/setup-k6-action@v1
