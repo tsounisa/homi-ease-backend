@@ -3,12 +3,11 @@ name: Backend CI/CD
 on:
   push:
     branches:
-      - '**'         # Run CI on all branches (feature branches AND main)
+      - '**'
   pull_request:
-    branches: [ "main" ] # Required check before merging into main
+    branches: [ "main" ]
 
 jobs:
-  # 1. CI JOB: Test Phase (Runs on all pushes and PRs)
   ci_check:
     name: Continuous Integration Check
     runs-on: ubuntu-latest
@@ -20,27 +19,42 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20.x' 
+        node-version: '20.x'
         cache: 'npm'
 
     - name: Install Dependencies
       run: npm install
 
-    # Runs the npm test script (currently the dummy script)
-    - name: Run Tests
+    - name: Run Unit Tests
       run: npm test
 
-  # 2. CD JOB: Deployment Phase (Runs ONLY after CI passes and ONLY on 'main' push)
+    - name: Start Backend Server
+      run: |
+        npm start &
+        sleep 15
+
+    - name: Install k6
+      run: |
+        curl -s https://raw.githubusercontent.com/grafana/k6/master/install.sh | bash
+
+    - name: Run k6 Login Load & Spike Tests
+      env:
+        BASE_URL: http://localhost:8080/api/v1
+      run: |
+        ./k6 run k6/login-tests.js
+
+    - name: Run k6 Houses Load & Spike Tests
+      env:
+        BASE_URL: http://localhost:8080/api/v1
+      run: |
+        ./k6 run k6/houses-tests.js
+
   cd_deploy:
     name: Continuous Deployment to Render
     runs-on: ubuntu-latest
-    
-    # CRITICAL: This job waits for ci_check to succeed first
-    needs: [ci_check] 
-    
-    # This condition ensures deployment ONLY runs when merging into the main branch
+    needs: [ci_check]
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     steps:
     - name: Deploy to Render via Hook
       run: |
