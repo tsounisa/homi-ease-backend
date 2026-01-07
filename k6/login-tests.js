@@ -1,3 +1,4 @@
+/* global __ENV */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
@@ -7,7 +8,7 @@ export const options = {
   vus: 1,
   duration: '10s',
   thresholds: {
-    http_req_failed: ['rate<=1'],   // επιτρέπει αποτυχίες (δεν θα πέσει το CI)
+    http_req_failed: ['rate<=1'],
   },
 };
 
@@ -27,5 +28,3 @@ export default function () {
 
   sleep(1);
 }
-
-
