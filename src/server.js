@@ -1,5 +1,5 @@
 import http from 'http';
-import 'dotenv/config'; 
+import 'dotenv/config';
 import { app } from './app.js';
 import { connectDB } from './config/database.js';
 import { logger } from './utils/logger.js';
@@ -20,7 +20,7 @@ const startServer = async () => {
 };
 
 process.on('unhandledRejection', (err) => {
-  logger.error('UNHANDLED REJECTION! 💥 Shutting down...');
+  logger.error('UNHANDLED REJECTION! 💥 Shutting down...', err);
   server.close(() => {
     process.exit(1);
   });
