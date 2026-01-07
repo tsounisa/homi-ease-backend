@@ -10,7 +10,7 @@ import { db } from '../config/database.js';
  * @description Middleware to protect routes.
  * Verifies JWT token and attaches user to req object.
  */
-export const protect = async (req, res, next) => {
+export const protect = async (req, _res, next) => {
   let token;
 
   if (
