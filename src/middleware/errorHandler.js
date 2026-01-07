@@ -22,7 +22,7 @@ const handleValidationErrorDB = (err) => {
 const handleJWTError = () => new ApiError(401, 'Not authorized');
 const handleJWTExpiredError = () => new ApiError(401, 'Session expired');
 
-export const errorHandler = (err, _req, res, _next) => {
+export const errorHandler = (err, req, res, next) => {
   let error = { ...err };
 
   error.message = err.message;
