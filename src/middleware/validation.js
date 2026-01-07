@@ -20,7 +20,7 @@ import { ApiError } from '../utils/ApiError.js';
  * //   }
  * // ];
  */
-export const validate = (schema) => (req, res, next) => {
+export const validate = () => (req, res, next) => {
   // This is a placeholder.
   // We will assume all data is valid for this example.
   // To implement, you would validate req.body against the 'schema'.
