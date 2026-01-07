@@ -32,14 +32,15 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use('/api/v1', apiRouter);
 
 // Health check
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.send('HomiEase API is running');
 });
 
 // 404 handler
-app.all('*', (req, res, next) => {
+app.all('*', (req, _res, next) => {
   next(new ApiError(404, `Can't find ${req.originalUrl} on this server!`));
 });
+
 
 // Global error handler
 app.use(errorHandler);
