@@ -66,5 +66,3 @@ The API routes are mounted under `/api/v1`.
 * `/api/v1/security/...`
 
 All endpoints (except registration and login) are protected and require a `Bearer <token>` in the `Authorization` header.
-
-test
