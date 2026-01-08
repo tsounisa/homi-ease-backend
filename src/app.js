@@ -37,7 +37,7 @@ app.get('/', (_req, res) => {
 });
 
 // 404 handler
-app.all('*', (req, _res, next) => {
+app.all('*', (req, res, next) => {
   next(new ApiError(404, `Can't find ${req.originalUrl} on this server!`));
 });
 
